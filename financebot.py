@@ -20,30 +20,30 @@ openai_client = OpenAI(api_key=openai_api_key, base_url="https://api.deepseek.co
 
 # RSS源地址列表
 rss_feeds = {
-    # "💲 华尔街见闻":{
-    #     "华尔街见闻":"https://dedicated.wallstreetcn.com/rss.xml",      
-    # },
+    "💲 华尔街见闻":{
+        "华尔街见闻":"https://dedicated.wallstreetcn.com/rss.xml",      
+    },
     "💻 36氪":{
         "36氪":"https://36kr.com/feed",   
         },
     "🇨🇳 中国经济": {
-        "香港經濟日報":"https://www.hket.com/rss/china",
+        # "香港經濟日報":"https://www.hket.com/rss/china",  # ❌ RSS解析失败，格式问题
         "东方财富":"http://rss.eastmoney.com/rss_partener.xml",
         "百度股票焦点":"http://news.baidu.com/n?cmd=1&class=stock&tn=rss&sub=0",
         "中新网":"https://www.chinanews.com.cn/rss/finance.xml",
         "国家统计局-最新发布":"https://www.stats.gov.cn/sj/zxfb/rss.xml",
-    }
-    #   "🇺🇸 美国经济": {
-    #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",
-    #     "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",
-    #     "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",
-    #     "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
-    #     "ETF Trends": "https://www.etftrends.com/feed/",
-    # },
-    # "🌍 世界经济": {
-    #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",
-    #     "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
-    # },
+    },
+    "🇺🇸 美国经济": {
+        # "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",  # ❌ 文章内容爬取失败(403 Forbidden)
+        # "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",  # ❌ 文章内容爬取失败(403 Forbidden)
+        # "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",  # ❌ 文章内容爬取失败(401 Forbidden)
+        "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
+        "ETF Trends": "https://www.etftrends.com/feed/",
+    },
+    "🌍 世界经济": {
+        # "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",  # ❌ 文章内容爬取失败(403 Forbidden)
+        "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
+    },
 }
 
 # 获取北京时间
@@ -65,12 +65,28 @@ def fetch_article_text(url):
         print(f"❌ 文章爬取失败: {url}，错误: {e}")
         return "（未能获取文章正文）"
 
-# 添加 User-Agent 头
+# 添加 User-Agent 头并禁用 SSL 验证
 def fetch_feed_with_headers(url):
+    import ssl
+    import urllib.request
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
-    return feedparser.parse(url, request_headers=headers)
+    
+    # 创建不验证 SSL 证书的上下文
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    # 创建请求对象
+    req = urllib.request.Request(url, headers=headers)
+    
+    # 使用自定义的 SSL 上下文打开 URL
+    with urllib.request.urlopen(req, context=ssl_context) as response:
+        content = response.read()
+    
+    # 解析内容
+    return feedparser.parse(content)
 
 
 # 自动重试获取 RSS
