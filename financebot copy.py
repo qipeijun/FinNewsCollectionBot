@@ -27,30 +27,22 @@ rss_feeds = {
         "36氪":"https://36kr.com/feed",
         },
     "🇨🇳 中国经济": {
-#         "香港經濟日報":"https://www.hket.com/rss/china",  # ❌ RSS解析失败，格式问题
+        "香港經濟日報":"https://www.hket.com/rss/china",  # ❌ RSS解析失败，格式问题
         "东方财富":"http://rss.eastmoney.com/rss_partener.xml",
         "百度股票焦点":"http://news.baidu.com/n?cmd=1&class=stock&tn=rss&sub=0",
         "中新网":"https://www.chinanews.com.cn/rss/finance.xml",
         "国家统计局-最新发布":"https://www.stats.gov.cn/sj/zxfb/rss.xml",
-        # "财新网":"https://rsshub.app/caixin/latest",  # ❌ 403 Forbidden
-        # "新浪财经":"https://rss.sina.com.cn/finance/latest/all.xml",  # ❌ 404 Not Found
     },
     "🇺🇸 美国经济": {
-#         "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",  # ❌ 文章内容爬取失败(403 Forbidden)
-#         "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",  # ❌ 文章内容爬取失败(403 Forbidden)
-#         "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",  # ❌ 文章内容爬取失败(401 Forbidden)
+        "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",  # ❌ 文章内容爬取失败(403 Forbidden)
+        "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",  # ❌ 文章内容爬取失败(403 Forbidden)
+        "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",  # ❌ 文章内容爬取失败(401 Forbidden)
         "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
         "ETF Trends": "https://www.etftrends.com/feed/",
-        "Federal Reserve Board": "https://www.federalreserve.gov/feeds/press_all.xml",  # 美联储新闻/声明
     },
     "🌍 世界经济": {
-#         "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",  # ❌ 文章内容爬取失败(403 Forbidden)
+        "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",  # ❌ 文章内容爬取失败(403 Forbidden)
         "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
-        "FT中文网": "https://www.ftchinese.com/rss/feed",  # 英国《金融时报》中文站
-        "Wall Street Journal": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",  # 华尔街日报 - 全球新闻
-        "Investing.com": "https://www.investing.com/rss/news.rss",  # 全球财经与投资新闻
-        "Thomson Reuters": "https://ir.thomsonreuters.com/rss/news-releases.xml",  # 路透财经新闻
-        # "IMF Publications": "https://www.imf.org/en/News/rss",  # ❌ 连接被关闭
     },
 }
 
