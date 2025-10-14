@@ -61,6 +61,15 @@ jobs:
           --html-file output/latest_report.html \
           --text-file output/latest_report.txt
         
+    - name: 📦 上传归档报告（artifact）
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: reports-${{ github.run_id }}
+        path: |
+          output/*.md
+        if-no-files-found: ignore
+        
     - name: 📊 显示运行结果（日志尾声）
       if: always()
       run: |
