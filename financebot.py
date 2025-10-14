@@ -126,7 +126,7 @@ def fetch_rss_articles(rss_feeds, max_articles=10):
             print(f"✅ {source} RSS 获取成功，共 {len(feed.entries)} 条新闻")
 
             articles = []  # 每个source都需要重新初始化列表
-            for entry in feed.entries[:5]:
+            for entry in feed.entries[:max_articles]:
                 title = entry.get('title', '无标题')
                 link = entry.get('link', '') or entry.get('guid', '')
                 if not link:
