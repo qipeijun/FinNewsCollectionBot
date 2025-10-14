@@ -8,6 +8,8 @@ on:
   
   # 手动触发
   workflow_dispatch:
+permissions:
+  contents: write
     inputs:
       test_mode:
         description: '测试模式（不发送微信推送）'
@@ -22,11 +24,13 @@ jobs:
     env:
       EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      EMAIL_TO: ${{ vars.EMAIL_TO || secrets.EMAIL_TO }}
     
     steps:
     - name: 📥 检出代码（checkout）
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 需要完整历史以便后续 pull/rebase/push
       
     - name: 🐍 设置 Python 环境（setup-python）
       uses: actions/setup-python@v4
@@ -38,7 +42,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: 🔧 设置环境变量（导入Secrets到环境）
+    - name: 🔧 设置环境变量（导入 Secrets/Variables 到环境）
       run: |
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
         echo "SERVER_CHAN_KEYS=${{ secrets.SERVER_CHAN_KEYS }}" >> $GITHUB_ENV
@@ -47,7 +51,7 @@ jobs:
         echo "EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}" >> $GITHUB_ENV
         echo "EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}" >> $GITHUB_ENV
         echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> $GITHUB_ENV
-        echo "EMAIL_TO=${{ secrets.EMAIL_TO }}" >> $GITHUB_ENV
+        echo "EMAIL_TO=${{ vars.EMAIL_TO || secrets.EMAIL_TO }}" >> $GITHUB_ENV
         
     - name: 🚀 运行财经新闻收集和摘要（python financebot.py）
       run: |
@@ -73,6 +77,29 @@ jobs:
         path: |
           output/*.md
         if-no-files-found: ignore
+
+    - name: 🔁 提交归档到仓库（pull --rebase 后 commit & push）
+      if: always()
+      run: |
+        set -e
+        echo "Git status before commit:" && git status --porcelain
+        # 配置提交用户
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        # 确定当前分支
+        BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+        echo "Current branch: ${BRANCH}"
+        # 拉取最新代码，避免非快进错误
+        git fetch origin "${BRANCH}"
+        git pull --rebase origin "${BRANCH}" || true
+        # 若无变化则跳过
+        if [ -z "$(git status --porcelain output/*.md 2>/dev/null || true)" ]; then
+          echo "No markdown report changes to commit. Skipping."
+          exit 0
+        fi
+        git add output/*.md
+        git commit -m "chore(report): 存档报告 ${ARCHIVE_DATE} [skip ci]"
+        git push origin "HEAD:${BRANCH}"
         
     - name: 📊 显示运行结果（日志尾声）
       if: always()
