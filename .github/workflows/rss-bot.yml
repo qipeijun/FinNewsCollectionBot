@@ -18,6 +18,10 @@ on:
 jobs:
   collect-and-summarize:
     runs-on: ubuntu-latest
+    env:
+      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
     
     steps:
     - name: 📥 检出代码
@@ -49,7 +53,7 @@ jobs:
         python financebot.py
     
     - name: ✉️ 发送邮件报告
-      if: ${{ secrets.EMAIL_USERNAME && secrets.EMAIL_PASSWORD && secrets.EMAIL_TO }}
+      if: ${{ env.EMAIL_USERNAME != '' && env.EMAIL_PASSWORD != '' && env.EMAIL_TO != '' }}
       run: |
         python scripts/send_email_report.py \
           --subject "📌 $(date +"%Y-%m-%d") 财经新闻摘要" \
