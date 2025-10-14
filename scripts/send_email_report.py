@@ -25,6 +25,54 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
+try:
+    # Python-Markdown
+    import markdown as md
+except Exception:
+    md = None
+
+
+def build_html(markdown_text: str) -> str:
+    """将Markdown渲染为带样式的HTML，若缺少依赖则做简易替换。"""
+    if md:
+        body = md.markdown(markdown_text, extensions=[
+            'extra', 'admonition', 'codehilite', 'sane_lists', 'toc'
+        ])
+    else:
+        # 兜底：极简替换，保证基本可读
+        body = (markdown_text
+                .replace('\n', '<br/>')
+                .replace('**', '')
+                )
+    # 简洁邮件模板
+    return f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',Arial,sans-serif;line-height:1.6;color:#222;background:#f6f8fa;margin:0;padding:0;}}
+    .container{{max-width:760px;margin:0 auto;background:#fff;padding:24px 24px 32px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.06);}}
+    h1,h2,h3{{color:#111;margin:16px 0 8px;}}
+    h1{{font-size:22px}}
+    h2{{font-size:18px;border-left:4px solid #6366f1;padding-left:8px;}}
+    h3{{font-size:16px;color:#444;}}
+    p,li{{font-size:14px;color:#333;}}
+    a{{color:#2563eb;text-decoration:none;}}
+    a:hover{{text-decoration:underline;}}
+    hr{{border:none;border-top:1px solid #eee;margin:16px 0}}
+    .footer{{color:#777;font-size:12px;margin-top:24px;text-align:center;}}
+  </style>
+  <title>Report</title>
+  </head>
+<body>
+  <div class="container">{body}</div>
+  <div class="footer">此邮件由 GitHub Actions 自动发送</div>
+</body>
+</html>
+""".strip()
+
 
 def send_email(subject: str, html_content: str, text_content: str) -> bool:
     smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
@@ -49,10 +97,19 @@ def send_email(subject: str, html_content: str, text_content: str) -> bool:
         msg['From'] = username if '@' in (username or '') else from_email
         msg['To'] = ", ".join(recipients)
 
+        # 构造HTML：优先使用提供的HTML；否则将文本Markdown渲染为HTML
+        final_html = html_content
+        if not final_html and text_content:
+            final_html = build_html(text_content)
+
+        # 若传入的HTML其实是Markdown痕迹，优先用text版本渲染
+        if final_html and ('**' in final_html or '\n#' in final_html or '## ' in final_html):
+            final_html = build_html(text_content or final_html)
+
         if text_content:
             msg.attach(MIMEText(text_content, 'plain', 'utf-8'))
-        if html_content:
-            msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+        if final_html:
+            msg.attach(MIMEText(final_html, 'html', 'utf-8'))
 
         server = None
         try:
