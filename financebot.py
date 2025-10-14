@@ -178,6 +178,7 @@ def send_to_wechat(title, content):
             print(f"❌ 推送失败: {key}, 响应：{response.text}")
 
 
+
 if __name__ == "__main__":
     today_str = today_date().strftime("%Y-%m-%d")
 
@@ -195,3 +196,10 @@ if __name__ == "__main__":
 
     # 推送到多个server酱key
     send_to_wechat(title=f"📌 {today_str} 财经新闻摘要", content=final_summary)
+
+    # 将报告写入文件，供独立脚本发送邮件
+    os.makedirs("output", exist_ok=True)
+    with open("output/latest_report.txt", "w", encoding="utf-8") as f_txt:
+        f_txt.write(final_summary)
+    with open("output/latest_report.html", "w", encoding="utf-8") as f_html:
+        f_html.write(final_summary.replace("\n", "<br/>"))

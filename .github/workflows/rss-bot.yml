@@ -37,10 +37,23 @@ jobs:
       run: |
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
         echo "SERVER_CHAN_KEYS=${{ secrets.SERVER_CHAN_KEYS }}" >> $GITHUB_ENV
+        echo "SMTP_SERVER=${{ secrets.SMTP_SERVER }}" >> $GITHUB_ENV
+        echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> $GITHUB_ENV
+        echo "EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}" >> $GITHUB_ENV
+        echo "EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}" >> $GITHUB_ENV
+        echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> $GITHUB_ENV
+        echo "EMAIL_TO=${{ secrets.EMAIL_TO }}" >> $GITHUB_ENV
         
     - name: 🚀 运行财经新闻收集和摘要
       run: |
         python financebot.py
+    
+    - name: ✉️ 发送邮件报告
+      run: |
+        python scripts/send_email_report.py \
+          --subject "📌 $(date +"%Y-%m-%d") 财经新闻摘要" \
+          --html-file output/latest_report.html \
+          --text-file output/latest_report.txt
         
     - name: 📊 显示运行结果
       if: always()
