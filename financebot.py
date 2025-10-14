@@ -207,7 +207,7 @@ if __name__ == "__main__":
     # 归档保存Markdown报告，按北京时间时间戳命名（YYYYMMDD_HHMMSS）
     beijing_now = datetime.now(pytz.timezone("Asia/Shanghai"))
     ts_str = beijing_now.strftime("%Y%m%d_%H%M%S")
-    archive_dir = os.path.join("output", "reports")
+    archive_dir = "output"
     os.makedirs(archive_dir, exist_ok=True)
     archive_path = os.path.join(archive_dir, f"report_{ts_str}.md")
     with open(archive_path, "w", encoding="utf-8") as f_md:
