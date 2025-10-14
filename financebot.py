@@ -203,3 +203,12 @@ if __name__ == "__main__":
         f_txt.write(final_summary)
     with open("output/latest_report.html", "w", encoding="utf-8") as f_html:
         f_html.write(final_summary.replace("\n", "<br/>"))
+
+    # 归档保存Markdown报告，按北京时间时间戳命名（YYYYMMDD_HHMMSS）
+    beijing_now = datetime.now(pytz.timezone("Asia/Shanghai"))
+    ts_str = beijing_now.strftime("%Y%m%d_%H%M%S")
+    archive_dir = os.path.join("output", "reports")
+    os.makedirs(archive_dir, exist_ok=True)
+    archive_path = os.path.join(archive_dir, f"report_{ts_str}.md")
+    with open(archive_path, "w", encoding="utf-8") as f_md:
+        f_md.write(final_summary)
