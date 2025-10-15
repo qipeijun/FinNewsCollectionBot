@@ -8,14 +8,15 @@ on:
   
   # 手动触发
   workflow_dispatch:
-permissions:
-  contents: write
     inputs:
       test_mode:
         description: '测试模式（不发送微信推送）'
         required: false
         default: false
         type: boolean
+
+permissions:
+  contents: write
 
 jobs:
   collect-and-summarize:
